@@ -8,7 +8,10 @@ setup(
     author='Matthew hewitt',
     author_email='',
     license='MIT',
-    packages=['db_logger'],
+    packages=[
+        'db_logger',
+        'db_logger.db_types'
+    ],
     install_requires=[
 
     ],
