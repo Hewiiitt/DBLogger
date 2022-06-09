@@ -51,6 +51,33 @@ class Variable(AbstractDBType):
         except Exception as e:
             print(e)
 
+    @staticmethod
+    def save_many_to_table(conn, entries):
+        try:
+            c = conn.cursor()
+            query = """INSERT INTO variables
+                                       (
+                                           _experiment_id,
+                                           _variable_name_id,
+                                           x_value,
+                                           y_value
+                                       ) VALUES
+                                       (?, ?, ?, ? );"""
+
+            data = []
+            for entry in entries:
+                if not VariableMetaData.has_variable(entry.variable_name):
+                    var_meta_1 = VariableMetaData(
+                        variable_name=entry.variable_name
+                    )
+                    var_meta_1.save_to_table(conn)
+                data.append(entry.get())
+
+            c.executemany(query, data)
+            conn.commit()
+        except Exception as e:
+            print(e)
+
     def get(self):
         var_meta_id = VariableMetaData.VAR_META_DATA[self.variable_name]
         return (

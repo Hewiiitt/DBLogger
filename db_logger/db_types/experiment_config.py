@@ -56,3 +56,34 @@ class Experiment(AbstractDBType):
             conn.commit()
         except Exception as e:
             print(e)
+
+    @staticmethod
+    def save_many_to_table(conn, entries):
+        try:
+            c = conn.cursor()
+            query = """INSERT INTO experiments
+                (
+                    _experiment_id, 
+                    project_name, 
+                    experiment_name, 
+                    experiment_count, 
+                    date_created, 
+                    description
+                ) VALUES
+                (?, ?, ?, ?, ?, ?);"""
+            data = [entry.get() for entry in entries]
+
+            c.executemany(query, data)
+            conn.commit()
+        except Exception as e:
+            print(e)
+
+    def get(self):
+        return (
+            self._experiment_id,
+            self.project_name,
+            self.experiment_name,
+            self.experiment_count,
+            self.date_created,
+            self.description
+        )

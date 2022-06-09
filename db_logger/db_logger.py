@@ -1,5 +1,6 @@
 import uuid
 
+from db_logger import LogClient
 from db_logger.db_types import AbstractDBType, Experiment, Variable, VariableMetaData
 from multiprocessing import Manager, Process
 from datetime import datetime
@@ -15,12 +16,13 @@ class DBLogger:
         Variable
     ]
 
-    def __init__(self, path='results.db', data_tables=[], multi_process=True):
+    def __init__(self, path='results.db', data_tables=[], multi_process=True, block_size=10000):
 
         data_tables = data_tables + DBLogger.db_defaults
         data_tables = set(data_tables)
 
         self.data_tables = data_tables
+        self.block_size = block_size
         self.conn = sql.connect(path, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
 
         self._init_db()
@@ -31,20 +33,44 @@ class DBLogger:
             self.manager = Manager()
             self.queue = self.manager.Queue()
 
-            self.process = Process(target=DBLogger.run, args=(self.queue, path, data_tables))
+            self.process = Process(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
             self.process.start()
 
     @staticmethod
-    def run(queue, path, data_tables):
+    def run(queue, path, data_tables, block_size=10000):
         conn = sql.connect(path, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
 
         for table in data_tables:
             table.pre_run_execution(conn)
 
-        while True:
-            task = queue.get()
+        next_task = None
 
-            task.save_to_table(conn)
+        while True:
+            tasks = []
+            if next_task is not None:
+                task = next_task
+            else:
+                if queue.qsize() < 1:
+                    continue
+                task = queue.get()
+
+            tasks.append(task)
+            next_task = queue.get()
+
+            while isinstance(next_task, type(task)):
+                tasks.append(next_task)
+                if queue.qsize() < 1:
+                    next_task = None
+                    break
+                next_task = queue.get()
+                if len(tasks) >= block_size:
+                    next_task = None
+                    break
+
+            if len(tasks) > 1:
+                type(tasks[0]).save_many_to_table(conn, tasks)
+            else:
+                tasks[0].save_to_table(conn)
 
     def can_close(self):
         return self.queue.qsize() < 1
@@ -65,8 +91,8 @@ class DBLogger:
         while not self.can_close():
             print('\r[DBLogger] - Clearing remaining tasks: {}\t\t'.format(self.get_length()), end='')
 
-        self.process.join()
-        print('[DBLogger] - Logger process terminated.')
+        self.process.terminate()
+        print('\r[DBLogger] - Logger process terminated.')
 
     def register_experiment(self, project_name, experiment_name, experiment_count, description='Sample Description.',date_created=None):
         if date_created is None:
@@ -85,4 +111,4 @@ class DBLogger:
 
         self.queue.put(exp_1)
 
-        return experiment_id
+        return LogClient(self.queue, experiment_id)

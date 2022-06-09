@@ -54,6 +54,30 @@ class VariableMetaData(AbstractDBType):
         except Exception as e:
             print(e)
 
+    @staticmethod
+    def save_many_to_table(conn, entries):
+        try:
+            c = conn.cursor()
+            query = """INSERT OR IGNORE INTO variable_meta_data
+                                       (
+                                           variable_name
+                                       ) VALUES
+                                       (?);"""
+            data = [entry.get() for entry in entries]
+
+            c.execute(query, data)
+            conn.commit()
+
+            query = """SELECT * FROM variable_meta_data WHERE variable_name=?;"""
+            c.execute(query, data)
+            rows = c.fetchall()
+
+            for row in rows:
+                VariableMetaData.VAR_META_DATA[row[1]] = row[0]
+
+        except Exception as e:
+            print(e)
+
     def get(self):
         return (
             self.variable_name,
