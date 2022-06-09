@@ -1,5 +1,6 @@
 import uuid
 
+from pathlib import Path
 from db_logger import LogClient
 from db_logger.db_types import AbstractDBType, Experiment, Variable, VariableMetaData
 from multiprocessing import Manager, Process
@@ -17,6 +18,7 @@ class DBLogger:
     ]
 
     def __init__(self, path='results.db', data_tables=[], multi_process=True, block_size=10000):
+        Path(path).mkdir(parents=True, exist_ok=True)
 
         data_tables = data_tables + DBLogger.db_defaults
         data_tables = set(data_tables)
