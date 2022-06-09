@@ -18,7 +18,7 @@ class DBLogger:
     ]
 
     def __init__(self, path='results.db', data_tables=[], multi_process=True, block_size=10000):
-        Path(path).mkdir(parents=True, exist_ok=True)
+        Path(path).parents[0].mkdir(parents=True, exist_ok=True)
 
         data_tables = data_tables + DBLogger.db_defaults
         data_tables = set(data_tables)
