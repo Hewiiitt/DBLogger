@@ -19,7 +19,7 @@ class Metric(AbstractDBType):
                 _experiment_id text NOT NULL,
                 metric_name text NOT NULL,
                 value real NOT NULL,
-                FOREIGN KEY(_experiment_id) REFERENCES experiments(_experiment_id),
+                FOREIGN KEY(_experiment_id) REFERENCES experiments(_experiment_id)
             ); """)
             conn.commit()
         except Exception as e:
