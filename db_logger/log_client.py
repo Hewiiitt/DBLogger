@@ -1,4 +1,4 @@
-from db_logger.db_types import Variable, VariableMetaData, Experiment
+from db_logger.db_types import Variable, VariableMetaData, Experiment, Metric
 
 
 class LogClient:
@@ -16,3 +16,12 @@ class LogClient:
         )
 
         self.queue.put(var)
+
+    def save_metric(self, metric_name, value):
+        met = Metric(
+            _experiment_id=self.experiment_id,
+            metric_name=metric_name,
+            value=value,
+        )
+
+        self.queue.put(met)
