@@ -1,5 +1,7 @@
 import uuid
+import threading
 
+from queue import Queue
 from pathlib import Path
 from db_logger import LogClient
 from db_logger.db_types import AbstractDBType, Experiment, Variable, VariableMetaData, Metric, BinVariable
@@ -32,12 +34,17 @@ class DBLogger:
         self._init_db()
 
         self.conn.close()
+        self.multi_process = multi_process
 
         if multi_process:
             self.manager = Manager()
             self.queue = self.manager.Queue()
 
             self.process = Process(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
+            self.process.start()
+        else:
+            self.queue = Queue()
+            self.process = threading.Thread(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
             self.process.start()
 
     @staticmethod
@@ -90,12 +97,20 @@ class DBLogger:
         print('[DBLogger] - Database finished initialising!')
 
     def close(self, force=False):
-        if force: self.process.join()
+        if force:
+            if self.multi_process:
+                self.process.terminate()
+            else:
+                self.process.join()
+            return
 
         while not self.can_close():
             print('\r[DBLogger] - Clearing remaining tasks: {}\t\t'.format(self.get_length()), end='')
 
-        self.process.terminate()
+        if self.multi_process:
+            self.process.terminate()
+        else:
+            self.process.join()
         print('\r[DBLogger] - Logger process terminated.')
 
     def register_experiment(self, project_name, experiment_name, experiment_count, description='Sample Description.',date_created=None):
