@@ -55,8 +55,9 @@ class DBLogger:
             table.pre_run_execution(conn)
 
         next_task = None
+        force_stop = False
 
-        while True:
+        while not force_stop:
             tasks = []
             if next_task is not None:
                 task = next_task
@@ -64,6 +65,9 @@ class DBLogger:
                 if queue.qsize() < 1:
                     continue
                 task = queue.get()
+                if task == 'Stop':
+                    force_stop = True
+                    break
 
             tasks.append(task)
             next_task = queue.get()
@@ -74,9 +78,15 @@ class DBLogger:
                     next_task = None
                     break
                 next_task = queue.get()
+                if next_task == 'Stop':
+                    force_stop = True
+                    break
                 if len(tasks) >= block_size:
                     next_task = None
                     break
+
+            if force_stop:
+                break
 
             if len(tasks) > 1:
                 type(tasks[0]).save_many_to_table(conn, tasks)
@@ -97,6 +107,7 @@ class DBLogger:
         print('[DBLogger] - Database finished initialising!')
 
     def close(self, force=False):
+        self.queue.put('Stop')
         if force:
             if self.multi_process:
                 self.process.terminate()
