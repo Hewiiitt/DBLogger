@@ -1,4 +1,4 @@
-import json
+import pickle
 
 from db_logger.db_types import AbstractDBType, VariableMetaData
 
@@ -86,5 +86,5 @@ class BinVariable(AbstractDBType):
             self._experiment_id,
             var_meta_id,
             self.x_value,
-            json.dumps(self.y_value).encode('utf-8'),
+            pickle.dumps(self.y_value),
         )
