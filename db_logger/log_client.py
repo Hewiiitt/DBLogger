@@ -1,4 +1,4 @@
-from db_logger.db_types import Variable, VariableMetaData, Experiment, Metric
+from db_logger.db_types import Variable, VariableMetaData, Experiment, Metric, BinVariable
 
 
 class LogClient:
@@ -25,3 +25,13 @@ class LogClient:
         )
 
         self.queue.put(met)
+
+    def save_bin_variable(self, variable_name, x, y):
+        var = BinVariable(
+            _experiment_id=self.experiment_id,
+            variable_name=variable_name,
+            x_value=x,
+            y_value=y,
+        )
+
+        self.queue.put(var)
