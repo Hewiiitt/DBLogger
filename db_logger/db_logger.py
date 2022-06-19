@@ -21,7 +21,7 @@ class DBLogger:
         BinVariable
     ]
 
-    def __init__(self, path='results.db', data_tables=[], multi_process=True, block_size=10000):
+    def __init__(self, path='results.db', data_tables=[], multi_process=False, block_size=10000):
         Path(path).parents[0].mkdir(parents=True, exist_ok=True)
 
         data_tables = data_tables + DBLogger.db_defaults

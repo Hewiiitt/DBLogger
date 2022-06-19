@@ -37,4 +37,8 @@ class LogClient:
         self.queue.put(var)
 
     def save_custom_variable(self, var):
-        self.queue.put(var)
+        if hasattr(var, 'experiment_id'):
+            var.experiment_id = self.experiment_id
+            self.queue.put(var)
+        else:
+            raise Exception('Custom logging types must include the attribute \'experiment_id\' in order to relate database entries to a particular experiment.')
