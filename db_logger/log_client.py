@@ -35,3 +35,6 @@ class LogClient:
         )
 
         self.queue.put(var)
+
+    def save_custom_variable(self, var):
+        self.queue.put(var)
