@@ -1,7 +1,6 @@
 import uuid
 import threading
 
-from queue import Queue
 from pathlib import Path
 from db_logger import LogClient
 from db_logger.db_types import AbstractDBType, Experiment, Variable, VariableMetaData, Metric, BinVariable
@@ -43,6 +42,7 @@ class DBLogger:
             self.process = Process(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
             self.process.start()
         else:
+            from queue import Queue
             self.queue = Queue()
             self.process = threading.Thread(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
             self.process.start()
