@@ -25,3 +25,7 @@ class AbstractDBType:
     @abstractmethod
     def save_to_table(self, conn):
         raise NotImplementedError()
+
+    @staticmethod
+    def delete_experiment(conn, experiment_id):
+        pass

@@ -80,6 +80,18 @@ class BinVariable(AbstractDBType):
         except Exception as e:
             print(e)
 
+    @staticmethod
+    def delete_experiment(conn, experiment_id):
+        try:
+            c = conn.cursor()
+            query = """DELETE * FROM INTO bin_variables
+                WHERE _experiment_id=?;"""
+
+            c.execute(query, (experiment_id, ))
+            conn.commit()
+        except Exception as e:
+            print(e)
+
     def get(self):
         var_meta_id = VariableMetaData.VAR_META_DATA[self.variable_name]
         return (

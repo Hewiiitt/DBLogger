@@ -107,7 +107,7 @@ class DBAnalyser:
 
         return np.array(x), np.array(y)
 
-    def get_all_experiment_bin_variable_data(self, experiment,):
+    def get_all_experiment_bin_variable_data(self, experiment):
         c = self.conn.cursor()
 
         query = """SELECT x_value, y_value FROM bin_variables WHERE _experiment_id=?;"""
@@ -123,6 +123,29 @@ class DBAnalyser:
             y.append(row[1])
 
         return np.array(x), np.array(y)
+
+    def get_all_tables(self):
+        c = self.conn.cursor()
+        query = """SELECT name FROM sqlite_schema WHERE type='table';"""
+        c.execute(query)
+        rows = c.fetchall()
+
+        return rows[0]
+
+    def delete_experiment(self, experiment_id):
+        try:
+            tables = self.get_all_tables()
+
+            for table in tables:
+                print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
+                c = self.conn.cursor()
+                query = """DELETE FROM {} WHERE _experiment_id=?;""".format(table)
+                data = (experiment_id, )
+                c.execute(query, data)
+                self.conn.commit()
+
+        except Exception as e:
+            print(e)
 
     def run_query(self, query, params):
         pass

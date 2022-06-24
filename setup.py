@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='db-logger',
-    version='0.1.0',
+    version='0.1.1',
     description='Local database logging library for recording experiment data.',
     url='https://github.com/Hewiiitt/DBLogger.git',
     author='Matthew hewitt',

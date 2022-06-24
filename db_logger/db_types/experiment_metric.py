@@ -28,7 +28,7 @@ class Metric(AbstractDBType):
     def save_to_table(self, conn):
         try:
             c = conn.cursor()
-            query = """INSERT INTO variables
+            query = """INSERT INTO metrics
                            (
                                 _experiment_id,
                                 metric_name,
@@ -46,7 +46,7 @@ class Metric(AbstractDBType):
     def save_many_to_table(conn, entries):
         try:
             c = conn.cursor()
-            query = """INSERT INTO variables
+            query = """INSERT INTO metrics
                            (
                                 _experiment_id,
                                 metric_name,
@@ -59,6 +59,18 @@ class Metric(AbstractDBType):
                 data.append(entry.get())
 
             c.executemany(query, data)
+            conn.commit()
+        except Exception as e:
+            print(e)
+
+    @staticmethod
+    def delete_experiment(conn, experiment_id):
+        try:
+            c = conn.cursor()
+            query = """DELETE * FROM INTO metrics
+                WHERE _experiment_id=?;"""
+
+            c.execute(query, (experiment_id, ))
             conn.commit()
         except Exception as e:
             print(e)

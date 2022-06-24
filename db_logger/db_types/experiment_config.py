@@ -78,6 +78,18 @@ class Experiment(AbstractDBType):
         except Exception as e:
             print(e)
 
+    @staticmethod
+    def delete_experiment(conn, experiment_id):
+        try:
+            c = conn.cursor()
+            query = """DELETE * FROM INTO experiments
+                WHERE _experiment_id=?;"""
+
+            c.execute(query, (experiment_id, ))
+            conn.commit()
+        except Exception as e:
+            print(e)
+
     def get(self):
         return (
             self._experiment_id,
