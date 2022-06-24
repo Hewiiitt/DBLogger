@@ -32,7 +32,7 @@ class Metric(AbstractDBType):
                            (
                                 _experiment_id,
                                 metric_name,
-                                value real
+                                value
                            ) VALUES
                            (?, ?, ? );"""
             data = self.get()
@@ -50,7 +50,7 @@ class Metric(AbstractDBType):
                            (
                                 _experiment_id,
                                 metric_name,
-                                value real
+                                value
                            ) VALUES
                            (?, ?, ? );"""
 

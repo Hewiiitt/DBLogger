@@ -1,3 +1,4 @@
+import time
 import uuid
 import threading
 
@@ -59,6 +60,7 @@ class DBLogger:
 
         while not force_stop:
             tasks = []
+            task_types = []
             if next_task is not None:
                 task = next_task
             else:
@@ -70,9 +72,10 @@ class DBLogger:
                     break
 
             tasks.append(task)
+            task_types.append(type(task))
             next_task = queue.get()
 
-            while isinstance(next_task, type(task)):
+            while len(tasks) < block_size:
                 tasks.append(next_task)
                 if queue.qsize() < 1:
                     next_task = None
@@ -85,13 +88,18 @@ class DBLogger:
                     next_task = None
                     break
 
-            if force_stop:
-                break
-
             if len(tasks) > 1:
-                type(tasks[0]).save_many_to_table(conn, tasks)
+                types = list(set(task_types))
+
+                for t in types:
+                    relevant_tasks = list(filter(lambda x: isinstance(x, t), tasks))
+                    t.save_many_to_table(conn, relevant_tasks)
+
             else:
                 tasks[0].save_to_table(conn)
+
+            if force_stop:
+                break
 
     def can_close(self):
         return self.queue.qsize() < 1
@@ -128,7 +136,7 @@ class DBLogger:
         if date_created is None:
             date_created = datetime.now()
 
-        experiment_id = str(uuid.uuid4())
+        experiment_id = str(uuid.uuid4()) + str(experiment_count)
 
         exp_1 = Experiment(
             _experiment_id=experiment_id,
