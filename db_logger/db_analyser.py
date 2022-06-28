@@ -158,12 +158,15 @@ class DBAnalyser:
                     c.execute(query, data)
                     self.conn.commit()
                 except:
-                    print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
-                    c = self.conn.cursor()
-                    query = """DELETE FROM {} WHERE experiment_id=?;""".format(table)
-                    data = (experiment_id,)
-                    c.execute(query, data)
-                    self.conn.commit()
+                    try:
+                        print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
+                        c = self.conn.cursor()
+                        query = """DELETE FROM {} WHERE experiment_id=?;""".format(table)
+                        data = (experiment_id,)
+                        c.execute(query, data)
+                        self.conn.commit()
+                    except:
+                        continue
 
         except Exception as e:
             print(e)
