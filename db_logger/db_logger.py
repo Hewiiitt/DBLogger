@@ -48,6 +48,59 @@ class DBLogger:
             self.process = threading.Thread(target=DBLogger.run, args=(self.queue, path, data_tables, block_size))
             self.process.start()
 
+    # @staticmethod
+    # def run(queue, path, data_tables, block_size=10000):
+    #     conn = sql.connect(path, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
+    #
+    #     for table in data_tables:
+    #         table.pre_run_execution(conn)
+    #
+    #     next_task = None
+    #     force_stop = False
+    #
+    #     while not force_stop:
+    #         tasks = []
+    #         task_types = []
+    #         if next_task is not None:
+    #             task = next_task
+    #         else:
+    #             if queue.qsize() < 1:
+    #                 continue
+    #             task = queue.get()
+    #             if task == 'Stop':
+    #                 force_stop = True
+    #                 break
+    #
+    #         tasks.append(task)
+    #         task_types.append(type(task))
+    #         next_task = queue.get()
+    #
+    #         while len(tasks) < block_size:
+    #             tasks.append(next_task)
+    #             if queue.qsize() < 1:
+    #                 next_task = None
+    #                 break
+    #             next_task = queue.get()
+    #             if next_task == 'Stop':
+    #                 force_stop = True
+    #                 break
+    #             if len(tasks) >= block_size:
+    #                 next_task = None
+    #                 break
+    #
+    #         if len(tasks) > 1:
+    #             types = list(set(task_types))
+    #
+    #             for t in types:
+    #                 relevant_tasks = list(filter(lambda x: isinstance(x, t), tasks))
+    #                 t.save_many_to_table(conn, relevant_tasks)
+    #
+    #         else:
+    #             tasks[0].save_to_table(conn)
+    #
+    #         if force_stop:
+    #             break
+
     @staticmethod
     def run(queue, path, data_tables, block_size=10000):
         conn = sql.connect(path, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
@@ -59,44 +112,14 @@ class DBLogger:
         force_stop = False
 
         while not force_stop:
-            tasks = []
-            task_types = []
-            if next_task is not None:
-                task = next_task
-            else:
-                if queue.qsize() < 1:
-                    continue
-                task = queue.get()
-                if task == 'Stop':
-                    force_stop = True
-                    break
+            if queue.qsize() < 1:
+                continue
+            task = queue.get()
+            if task == 'Stop':
+                force_stop = True
+                break
 
-            tasks.append(task)
-            task_types.append(type(task))
-            next_task = queue.get()
-
-            while len(tasks) < block_size:
-                tasks.append(next_task)
-                if queue.qsize() < 1:
-                    next_task = None
-                    break
-                next_task = queue.get()
-                if next_task == 'Stop':
-                    force_stop = True
-                    break
-                if len(tasks) >= block_size:
-                    next_task = None
-                    break
-
-            if len(tasks) > 1:
-                types = list(set(task_types))
-
-                for t in types:
-                    relevant_tasks = list(filter(lambda x: isinstance(x, t), tasks))
-                    t.save_many_to_table(conn, relevant_tasks)
-
-            else:
-                tasks[0].save_to_table(conn)
+            task.save_to_table(conn)
 
             if force_stop:
                 break
