@@ -55,7 +55,10 @@ class DBAnalyser:
         c.execute(query, (experiment, metric_name))
         rows = c.fetchall()
 
-        return float(rows[0])
+        if len(rows) > 0 and rows[0] is not None:
+            return float(rows[0][0])
+        else:
+            return None
 
     def get_variable_data(self, experiment, variable):
         if isinstance(variable, str):
