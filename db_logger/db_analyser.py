@@ -143,7 +143,7 @@ class DBAnalyser:
         c.execute(query)
         rows = c.fetchall()
 
-        return rows
+        return [row[0] for row in rows]
 
     def delete_experiment(self, experiment_id):
         try:
