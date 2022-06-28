@@ -150,12 +150,20 @@ class DBAnalyser:
             tables = self.get_all_tables()
 
             for table in tables:
-                print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
-                c = self.conn.cursor()
-                query = """DELETE FROM {} WHERE _experiment_id=?;""".format(table)
-                data = (experiment_id, )
-                c.execute(query, data)
-                self.conn.commit()
+                try:
+                    print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
+                    c = self.conn.cursor()
+                    query = """DELETE FROM {} WHERE _experiment_id=?;""".format(table)
+                    data = (experiment_id, )
+                    c.execute(query, data)
+                    self.conn.commit()
+                except:
+                    print('[DB Logger] - Deleting experiment {} from {}'.format(experiment_id, table))
+                    c = self.conn.cursor()
+                    query = """DELETE FROM {} WHERE experiment_id=?;""".format(table)
+                    data = (experiment_id,)
+                    c.execute(query, data)
+                    self.conn.commit()
 
         except Exception as e:
             print(e)
