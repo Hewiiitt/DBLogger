@@ -55,12 +55,7 @@ class DBAnalyser:
         c.execute(query, (experiment, metric_name))
         rows = c.fetchall()
 
-        x = []
-
-        for row in rows:
-            x.append(row[0])
-
-        return float(x)
+        return float(rows[0])
 
     def get_variable_data(self, experiment, variable):
         if isinstance(variable, str):
