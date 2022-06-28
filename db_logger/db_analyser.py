@@ -47,6 +47,21 @@ class DBAnalyser:
 
         return result
 
+    def get_metric(self, experiment, metric_name):
+        c = self.conn.cursor()
+
+        query = """SELECT value FROM metrics WHERE _experiment_id=? AND metric_name=?;"""
+
+        c.execute(query, (experiment, metric_name))
+        rows = c.fetchall()
+
+        x = []
+
+        for row in rows:
+            x.append(row[0])
+
+        return float(x)
+
     def get_variable_data(self, experiment, variable):
         if isinstance(variable, str):
             var_id = self.get_variable_id(variable)
